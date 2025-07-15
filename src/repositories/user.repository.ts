@@ -18,16 +18,18 @@ export class UserRepository {
     }
   }
 
-  async save(user: any, mensagem: string) {
-    await getFirestore().collection("users").add(user);
+  async save(user: User, mensagem: string) {
+    delete user.password;
+    await getFirestore().collection("users").doc(user.id).set(user);
     return { message: mensagem };
   }
 
-  async update(id: string, nome: string, email: string, mensagem: string) {
-    const docRef = getFirestore().collection("users").doc(id);
+
+  async update(user:User, mensagem: string) {
+    const docRef = getFirestore().collection("users").doc(user.id);
 
     if ((await docRef.get()).exists) {
-      await docRef.set({ nome, email });
+      await docRef.set({nome: user.nome, email: user.email });
       return { message: mensagem };
     } else {
       return null

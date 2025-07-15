@@ -1,8 +1,10 @@
 import { NotFoundError } from "../errors/not-found.error";
 import { User } from "../models/user.model";
 import { UserRepository } from "../repositories/user.repository";
+import { AuthService } from "./auth.service";
 
 const userRepository = new UserRepository();
+const authService = new AuthService();
 
 export class UserService {
   async getAll(): Promise<User[]> {
@@ -18,18 +20,20 @@ export class UserService {
     return user;
   }
 
-  async save(user: any, mensagem: string) {
+  async save(user: User, mensagem: string) {
+    const userAuth = await authService.create(user);
+    user.id = userAuth.uid
     return userRepository.save(user, mensagem);
   }
 
-  async update(id: string, nome: string, email: string, mensagem: string) {
-    const user = await userRepository.update(id, nome, email, mensagem);
+  async update(user:User, mensagem: string) {
+    const _user = await userRepository.update(user, mensagem);
 
-    if (!user) {
+    if (!_user) {
       throw new NotFoundError("Usuário Não Encontrado!");
     }
 
-    return user;
+    return _user;
   }
 
   async delete(id: string) {
